@@ -41,9 +41,11 @@ func (dao *PlayerDAO) Connect() {
 
 // FindAll returns all returns all document in the given collection
 func (dao *PlayerDAO) FindAll(player models.Player) {
-	var players []models.Player
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	cursor, err := db.Collection(COLLECTION).Find(ctx, bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
 		documents := &bson.D{}
