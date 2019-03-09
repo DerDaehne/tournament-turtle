@@ -4,6 +4,9 @@ import (
 	"context"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/DerDaehne/tournament-turtle/models"
@@ -36,9 +39,38 @@ func (dao *PlayerDAO) Connect() {
 	db.ReadPreference()
 }
 
+// FindAll returns all returns all document in the given collection
+func (dao *PlayerDAO) FindAll(player models.Player) {
+	var players []models.Player
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	cursor, err := db.Collection(COLLECTION).Find(ctx, bson.D{})
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		documents := &bson.D{}
+		if err := cursor.Decode(documents); err != nil {
+			log.Fatal(err)
+		}
+
+		m := documents.Map()
+		player := models.Player{
+			ID:         m["_id"].(primitive.ObjectID).Hex(),
+			LastName:   m["lastname"].(string),
+			FirstName:  m["firstname"].(string),
+			NickName:   m["nickname"].(string),
+			SkillLevel: m["skilllevel"].(int),
+		}
+		log.Info(player)
+	}
+}
+
 // Insert a new Entry into our Collection
 func (dao *PlayerDAO) Insert(player models.Player) error {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	_, err := db.Collection(COLLECTION).InsertOne(ctx, player)
+	_, err := db.Collection(COLLECTION).InsertOne(ctx, bson.D{
+		{"firstname", player.FirstName},
+		{"lastname", player.LastName},
+		{"nickname", player.NickName},
+		{"skilllevel", player.SkillLevel},
+	})
 	return err
 }
