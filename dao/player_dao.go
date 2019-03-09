@@ -29,14 +29,15 @@ const (
 var db *mongo.Database
 
 // Connect to a running MongoDB instance
-func (dao *PlayerDAO) Connect() {
+func (dao *PlayerDAO) Connect() error {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dao.Server))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	db := client.Database(dao.Database)
+	db = client.Database(dao.Database)
 	db.ReadPreference()
+	return nil
 }
 
 // FindAll returns all returns all document in the given collection
