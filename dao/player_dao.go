@@ -2,18 +2,19 @@ package dao
 
 import (
 	"context"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/DerDaehne/tournament-turtle/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 // PlayerDAO is the data access object for our players db
 type PlayerDAO struct {
-	Server string
+	Server   string
+	Database string
 }
 
 const (
@@ -21,8 +22,8 @@ const (
 	COLLECTION = "players"
 )
 
-// client is the mongoDB Client
-var client mongo.Client
+// db is the database to use
+var db mongo.Database
 
 // Connect to a running MongoDB instance
 func (dao *PlayerDAO) Connect() {
@@ -31,10 +32,13 @@ func (dao *PlayerDAO) Connect() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	client.Ping(ctx, readpref.Primary())
+	db := client.Database(dao.Database)
+	db.ReadPreference()
 }
 
 // Insert a new Entry into our Collection
-func (dao *PlayerDAO) Insert(player models.Player) {
-
+func (dao *PlayerDAO) Insert(player models.Player) error {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	_, err := db.Collection(COLLECTION).InsertOne(ctx, player)
+	return err
 }
