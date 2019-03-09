@@ -65,7 +65,6 @@ func (dao *PlayerDAO) FindAll() ([]models.Player, error) {
 			SkillLevel: int(m["skilllevel"].(int32)),
 		}
 		players = append(players, player)
-		log.Info(player)
 	}
 	return players, nil
 }
