@@ -55,7 +55,7 @@ func main() {
 	router := mux.NewRouter()
 
 	// ignore this - i need this so that gofmt thinks the package "fmt" is in use and won't delete it from my import list
-	fmt.Printf("Hello")
+	fmt.Printf("Hello\n")
 
 	// set handler functions
 	router.HandleFunc("/players", AllPlayersEndPoint).Methods("GET")
