@@ -1,12 +1,9 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson"
-
 // Player represents a Person who want's to play
 type Player struct {
-	ID         bson.D
-	LastName   string
-	FirstName  string
-	NickName   string
-	SkillLevel int
+	LastName   string `bson:"lastname" json:"lastname"`
+	FirstName  string `bson:"firstname" json:"firstname"`
+	NickName   string `bson:"nickname" json:"nickname"`
+	SkillLevel int    `bson:"skilllevel" json:"skilllevel"`
 }
