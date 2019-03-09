@@ -41,12 +41,14 @@ func (dao *PlayerDAO) Connect() error {
 }
 
 // FindAll returns all returns all document in the given collection
-func (dao *PlayerDAO) FindAll(player models.Player) {
+func (dao *PlayerDAO) FindAll() ([]models.Player, error) {
+	var players []models.Player
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	cursor, err := db.Collection(COLLECTION).Find(ctx, bson.D{})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
 		documents := &bson.D{}
@@ -60,10 +62,12 @@ func (dao *PlayerDAO) FindAll(player models.Player) {
 			LastName:   m["lastname"].(string),
 			FirstName:  m["firstname"].(string),
 			NickName:   m["nickname"].(string),
-			SkillLevel: m["skilllevel"].(int),
+			SkillLevel: int(m["skilllevel"].(int32)),
 		}
+		players = append(players, player)
 		log.Info(player)
 	}
+	return players, nil
 }
 
 // Insert a new Entry into our Collection

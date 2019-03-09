@@ -28,7 +28,12 @@ func logRequestInfo(request *http.Request) {
 func AllPlayersEndPoint(writer http.ResponseWriter, request *http.Request) {
 	logRequestInfo(request)
 
-	fmt.Fprintln(writer, "not implemented yet!")
+	players, err := playerDAO.FindAll()
+	if err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+	}
+
+	respondWithJSON(writer, http.StatusOK, players)
 }
 
 // CreatePlayerEndPoint will create a new Player entry in the database
