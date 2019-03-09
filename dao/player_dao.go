@@ -23,7 +23,7 @@ const (
 )
 
 // db is the database to use
-var db mongo.Database
+var db *mongo.Database
 
 // Connect to a running MongoDB instance
 func (dao *PlayerDAO) Connect() {
