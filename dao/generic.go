@@ -18,7 +18,7 @@ type Mongo struct {
 var db *mongo.Database
 
 // Connect to a running MongoDB instance
-func (dao Database) Connect() error {
+func (dao Mongo) Connect() error {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dao.Server))
 	if err != nil {
