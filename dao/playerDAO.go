@@ -80,3 +80,22 @@ func (dao *PlayerDAO) Insert(player models.Player) error {
 	})
 	return err
 }
+
+// FindByID searches for an Player by an given id
+func (dao *PlayerDAO) FindByID(playerID string) (models.Player, error) {
+	var player models.Player
+
+	id, errconvert := primitive.ObjectIDFromHex(playerID)
+	if errconvert != nil {
+		return player, errconvert
+	}
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	filter := bson.M{"_id": id}
+
+	err := db.Collection(COLLECTION).FindOne(ctx, filter).Decode(&player)
+	if err != nil {
+		return player, err
+	}
+	return player, nil
+}

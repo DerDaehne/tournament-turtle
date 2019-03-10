@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// create a new dao
 var playerDAO = dao.PlayerDAO{}
 
 // logRequestInfo logs mostly useful information about received requests
@@ -31,6 +32,8 @@ func AllPlayersEndPoint(writer http.ResponseWriter, request *http.Request) {
 	players, err := playerDAO.FindAll()
 	if err != nil {
 		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		log.Error(err)
+		return
 	}
 
 	respondWithJSON(writer, http.StatusOK, players)
@@ -44,11 +47,14 @@ func CreatePlayerEndPoint(writer http.ResponseWriter, request *http.Request) {
 	var player models.Player
 
 	if err := json.NewDecoder(request.Body).Decode(&player); err != nil {
-		log.Error("json decode error: " + err.Error())
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		log.Error(err)
 		return
 	}
 	if err := playerDAO.Insert(player); err != nil {
-		log.Fatal(err)
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		log.Error(err)
+		return
 	}
 
 	respondWithJSON(writer, http.StatusOK, map[string]string{"result": "success"})
@@ -66,10 +72,20 @@ func DeletePlayerEndPoint(writer http.ResponseWriter, request *http.Request) {
 	fmt.Fprintln(writer, "not implemented yet!")
 }
 
-// FindPlayerEndPoint will find a Player's entry
-func FindPlayerEndPoint(writer http.ResponseWriter, request *http.Request) {
+// FindPlayerByIDEndPoint will find a Player's entry
+func FindPlayerByIDEndPoint(writer http.ResponseWriter, request *http.Request) {
 	logRequestInfo(request)
-	fmt.Fprintln(writer, "not implemented yet!")
+
+	parameters := mux.Vars(request)
+	log.Info(parameters["id"])
+	player, err := playerDAO.FindByID(parameters["id"])
+	if err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		log.Error(err)
+		return
+	}
+
+	respondWithJSON(writer, http.StatusOK, player)
 }
 
 // respondWithError returns a http status code
@@ -110,7 +126,7 @@ func main() {
 	router.HandleFunc("/players", CreatePlayerEndPoint).Methods("POST")
 	router.HandleFunc("/players", UpdatePlayerEndPoint).Methods("PUT")
 	router.HandleFunc("/players", DeletePlayerEndPoint).Methods("DELETE")
-	router.HandleFunc("/players", FindPlayerEndPoint).Methods("GET")
+	router.HandleFunc("/players/{id}", FindPlayerByIDEndPoint).Methods("GET")
 
 	// start listening on port 8080
 	// ports is currently hard coded and will be configurable later on
