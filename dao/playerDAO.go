@@ -99,3 +99,44 @@ func (dao *PlayerDAO) FindByID(playerID string) (models.Player, error) {
 	}
 	return player, nil
 }
+
+// Delete a player entry
+func (dao *PlayerDAO) Delete(player models.Player) error {
+	id, errconvert := primitive.ObjectIDFromHex(player.ID)
+	if errconvert != nil {
+		return errconvert
+	}
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	filter := bson.M{"_id": id}
+
+	_, err := db.Collection(COLLECTION).DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dao *PlayerDAO) Update(player models.Player) error {
+	id, errconvert := primitive.ObjectIDFromHex(player.ID)
+	if errconvert != nil {
+		return errconvert
+	}
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	filter := bson.M{"_id": id}
+
+	_, err := db.Collection(COLLECTION).UpdateOne(ctx, filter, bson.D{
+		{"$set",
+			bson.D{
+				{"firstname", player.FirstName},
+				{"lastname", player.LastName},
+				{"nickname", player.NickName},
+				{"skilllevel", player.SkillLevel},
+			}},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}

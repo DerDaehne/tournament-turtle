@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/DerDaehne/tournament-turtle/dao"
+	"./dao"
+	// "github.com/DerDaehne/tournament-turtle/dao"
 	"github.com/DerDaehne/tournament-turtle/models"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -62,14 +63,44 @@ func CreatePlayerEndPoint(writer http.ResponseWriter, request *http.Request) {
 
 // UpdatePlayerEndPoint will update a Player entry in the database
 func UpdatePlayerEndPoint(writer http.ResponseWriter, request *http.Request) {
+	defer request.Body.Close()
 	logRequestInfo(request)
-	fmt.Fprintln(writer, "not implemented yet!")
+
+	var player models.Player
+
+	if err := json.NewDecoder(request.Body).Decode(&player); err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		log.Error(err)
+		return
+	}
+	if err := playerDAO.Update(player); err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		log.Error(err)
+		return
+	}
+
+	respondWithJSON(writer, http.StatusOK, map[string]string{"result": "success"})
 }
 
 // DeletePlayerEndPoint will drop a Player entry
 func DeletePlayerEndPoint(writer http.ResponseWriter, request *http.Request) {
+	defer request.Body.Close()
 	logRequestInfo(request)
-	fmt.Fprintln(writer, "not implemented yet!")
+
+	var player models.Player
+
+	if err := json.NewDecoder(request.Body).Decode(&player); err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		log.Error(err)
+		return
+	}
+	if err := playerDAO.Delete(player); err != nil {
+		respondWithError(writer, http.StatusInternalServerError, err.Error())
+		log.Error(err)
+		return
+	}
+
+	respondWithJSON(writer, http.StatusOK, map[string]string{"result": "success"})
 }
 
 // FindPlayerByIDEndPoint will find a Player's entry
