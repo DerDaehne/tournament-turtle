@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// GenericDAO is the data access object for our db itself
+// Mongo is the data access object for our db itself
 type Mongo struct {
 	Server   string
 	Database string
@@ -19,7 +19,8 @@ var db *mongo.Database
 
 // Connect to a running MongoDB instance
 func (dao Mongo) Connect() error {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dao.Server))
 	if err != nil {
 		return err

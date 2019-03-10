@@ -12,13 +12,13 @@ import (
 	"github.com/DerDaehne/tournament-turtle/models"
 )
 
-// PlayerDAO is the data access object for our players db
+// PlayerDAO is the data access object for our players db collection
 type PlayerDAO struct {
 }
 
 const (
-	// COLLECTION is the name of the mongodb collection to use
-	COLLECTION = "players"
+	// PCOLLECTION is the name of the mongodb collection to use
+	PCOLLECTION = "players"
 )
 
 // FindAll returns all returns all document in the given collection
@@ -26,7 +26,7 @@ func (dao *PlayerDAO) FindAll() ([]models.Player, error) {
 	var players []models.Player
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	cursor, err := db.Collection(COLLECTION).Find(ctx, bson.D{})
+	cursor, err := db.Collection(PCOLLECTION).Find(ctx, bson.D{})
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (dao *PlayerDAO) FindAll() ([]models.Player, error) {
 func (dao *PlayerDAO) Insert(player models.Player) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, err := db.Collection(COLLECTION).InsertOne(ctx, bson.D{
+	_, err := db.Collection(PCOLLECTION).InsertOne(ctx, bson.D{
 		{"firstname", player.FirstName},
 		{"lastname", player.LastName},
 		{"nickname", player.NickName},
@@ -77,7 +77,7 @@ func (dao *PlayerDAO) FindByID(playerID string) (models.Player, error) {
 	defer cancel()
 	filter := bson.M{"_id": id}
 
-	err := db.Collection(COLLECTION).FindOne(ctx, filter).Decode(&player)
+	err := db.Collection(PCOLLECTION).FindOne(ctx, filter).Decode(&player)
 	if err != nil {
 		return player, err
 	}
@@ -95,7 +95,7 @@ func (dao *PlayerDAO) Delete(player models.Player) error {
 	defer cancel()
 	filter := bson.M{"_id": id}
 
-	_, err := db.Collection(COLLECTION).DeleteOne(ctx, filter)
+	_, err := db.Collection(PCOLLECTION).DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (dao *PlayerDAO) Update(player models.Player) error {
 	defer cancel()
 	filter := bson.M{"_id": id}
 
-	_, err := db.Collection(COLLECTION).UpdateOne(ctx, filter, bson.D{
+	_, err := db.Collection(PCOLLECTION).UpdateOne(ctx, filter, bson.D{
 		{"$set",
 			bson.D{
 				{"firstname", player.FirstName},
