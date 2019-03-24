@@ -36,16 +36,18 @@ func main() {
 	// ignore this - i need this so that gofmt thinks the package "fmt" is in use and won't delete it from my import list
 	fmt.Printf("Hello\n")
 
-	//am := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
-	//ao := handlers.AllowedOrigins([]string{""})
-	//ah := handlers.AllowedHeaders([]string{"Content-Type", "Bearer", "Bearer ", "content-type", "Origin", "Accept"})
-
-	// set handler functions
 	router.HandleFunc("/players", handles.AllPlayersEndPoint).Methods("GET")
 	router.HandleFunc("/players", handles.CreatePlayerEndPoint).Methods("POST", "OPTIONS")
 	router.HandleFunc("/players", handles.UpdatePlayerEndPoint).Methods("PUT")
 	router.HandleFunc("/players", handles.DeletePlayerEndPoint).Methods("DELETE")
 	router.HandleFunc("/players/{id}", handles.FindPlayerByIDEndPoint).Methods("GET")
+
+	// set handler functions for teams
+	router.HandleFunc("/teams", handles.AllTeamsEndPoint).Methods("GET")
+	router.HandleFunc("/teams", handles.CreateTeamEndPoint).Methods("POST")
+	router.HandleFunc("/teams", handles.UpdateTeamEndPoint).Methods("PUT")
+	router.HandleFunc("/teams", handles.DeleteTeamEndPoint).Methods("DELETE")
+	router.HandleFunc("/teams/{id}", handles.FindTeamByIDEndPoint).Methods("GET")
 
 	// start listening on port 8080
 	// ports is currently hard coded and will be configurable later on
