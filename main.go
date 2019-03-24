@@ -10,6 +10,23 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Executing middleware", r.Method)
+
+		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers:", "Origin, Content-Type, X-Auth-Token, Authorization")
+			w.Header().Set("Content-Type", "application/json")
+			return
+		}
+
+		next.ServeHTTP(w, r)
+		log.Println("Executing middleware again")
+	})
+}
+
 // main creates a new mux Router and starts listening on a network port
 func main() {
 
@@ -19,16 +36,22 @@ func main() {
 	// ignore this - i need this so that gofmt thinks the package "fmt" is in use and won't delete it from my import list
 	fmt.Printf("Hello\n")
 
+	//am := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	//ao := handlers.AllowedOrigins([]string{""})
+	//ah := handlers.AllowedHeaders([]string{"Content-Type", "Bearer", "Bearer ", "content-type", "Origin", "Accept"})
+
 	// set handler functions
 	router.HandleFunc("/players", handles.AllPlayersEndPoint).Methods("GET")
-	router.HandleFunc("/players", handles.CreatePlayerEndPoint).Methods("POST")
+	router.HandleFunc("/players", handles.CreatePlayerEndPoint).Methods("POST", "OPTIONS")
 	router.HandleFunc("/players", handles.UpdatePlayerEndPoint).Methods("PUT")
 	router.HandleFunc("/players", handles.DeletePlayerEndPoint).Methods("DELETE")
 	router.HandleFunc("/players/{id}", handles.FindPlayerByIDEndPoint).Methods("GET")
 
 	// start listening on port 8080
 	// ports is currently hard coded and will be configurable later on
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	//router.Use(mux.CORSMethodMiddleware(router))
+	//if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := http.ListenAndServe(":8080", corsMiddleware(router)); err != nil {
 		log.Fatal(err)
 	}
 }
